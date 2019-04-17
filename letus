@@ -9,7 +9,8 @@ HOST = '172.27.5.188'
 PORT = 4444
 
 
-node = [1,2,3,4,5,6,7]
+work = [1,2,3,4,5,6,7]
+totalWork = len(work)
 args = argsParser()
 
 def main():
@@ -28,10 +29,12 @@ def workToDo(conn, addr):
     with conn:
         while True:
             try:
-                conn.sendall(args.command.encode())
+                currentWork = work.pop()
+                command = f'{args.command} --node:{currentWork}/{totalWork}'
+                conn.sendall(command.encode())
                 data = conn.recv(1024).decode()
                 print(data)
-                print(f' {addr} end work: {str(node.pop())}')
+                print(f' {addr} end work: {currentWork}')
             except Exception as e:
                 print(e)
                 break
