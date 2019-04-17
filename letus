@@ -3,19 +3,39 @@
 
 import socket
 from args import argsParser
+import threading
 
-HOST = '192.168.0.4'
+HOST = '172.27.5.188'
 PORT = 4444
 
+
+node = [1,2,3,4,5,6,7]
 args = argsParser()
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind((HOST,PORT))
-    print('[+] listening connection on ' + HOST)
-    while True:
-        s.listen()
-        conn, addr = s.accept()
-        print(f'[+] node 1 connected with ip: {addr}')
-        with conn:
-            conn.sendall(args.command.encode())
+def main():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((HOST,PORT))
+        print('[+] listening connection on ' + HOST)
+        while True:
+            s.listen()
+            conn, addr = s.accept()
+            print(f'[+] node connected with ip: {addr}')
+            threading.Thread(target=workToDo, args=(conn,addr,)).start()
+
+def workToDo(conn, addr):
+    print('start thread')
+    with conn:
+        while True:
+            try:
+                conn.sendall(args.command.encode())
+                data = conn.recv(1024).decode()
+                print(data)
+                print(f' {addr} end work: {str(node.pop())}')
+            except Exception as e:
+                print(e)
+                break
+
+
+if __name__ == "__main__":
+    main()
