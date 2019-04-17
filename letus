@@ -1,0 +1,21 @@
+#! /usr/bin/env python3
+
+
+import socket
+from args import argsParser
+
+HOST = '192.168.0.4'
+PORT = 4444
+
+args = argsParser()
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind((HOST,PORT))
+    print('[+] listening connection on ' + HOST)
+    while True:
+        s.listen()
+        conn, addr = s.accept()
+        print(f'[+] node 1 connected with ip: {addr}')
+        with conn:
+            conn.sendall(args.command.encode())
