@@ -9,7 +9,7 @@ HOST = '172.27.5.188'
 PORT = 4444
 
 
-work = [1,2,3,4,5,6,7]
+work = [x for x in range(1,100)]
 totalWork = len(work)
 args = argsParser()
 
