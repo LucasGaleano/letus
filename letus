@@ -27,6 +27,8 @@ def main():
 def workToDo(conn, addr):
     print('start thread')
     with conn:
+        with open('pass.lst') as file:
+            conn.send(file.read().encode())
         while True:
             try:
                 currentWork = work.pop()
