@@ -5,35 +5,52 @@ import socket
 import subprocess
 from time import sleep
 
-HOST = '172.27.5.188'
+HOST = '192.168.0.27'
 PORT = 4444
+FILE = 'test.lst'
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+def main():
+
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+
+            tryConnect(s)
+            print(f'[+] Connecting with {s.getpeername()}')
+            print('[+] receiving hash')
+            receiveHash(s)
+            s.send('[+] hash recieved'.encode())
+            print('[+] start working')
+            doTheWork(s)
+
+def tryConnect(s):
     while True:
         try:
             s.connect((HOST, PORT))
-            with open('test.lst','w') as file:
-                file.write(s.recv(1024).decode())
             break
         except:
-            print('wait server...')
+            print('waiting for work...')
             sleep(2)
             pass
 
+def receiveHash(s):
+    with open('test.lst','w') as file:
+        file.write(s.recv(1024).decode())
+
+def doTheWork(s):
     while True:
         try:
-            #sleep(2)
             data = s.recv(1024)
 
             print(data.decode())
             if data:
-                data = data.decode() + ' test.lst'
-                print('start working')
+                data = f'{data.decode()} {FILE}'
                 output = subprocess.check_output(data,shell=True)
                 s.send(output)
-                print('end working')
             if not data:
                 break
         except Exception as error:
             print(error)
             break
+
+if __name__ == "__main__":
+    main()

@@ -3,14 +3,15 @@
 
 import socket
 from args import argsParser
-import threading
+from threading import Thread
+import os
 
-HOST = '172.27.5.188'
+HOST = '192.168.0.27'
 PORT = 4444
 
 
-work = [x for x in range(1,100)]
-totalWork = len(work)
+totalWork = 20
+work = [x for x in range(1,totalWork) if x%2==1]
 args = argsParser()
 
 def main():
@@ -19,28 +20,42 @@ def main():
         s.bind((HOST,PORT))
         print('[+] listening connection on ' + HOST)
         while True:
-            s.listen()
-            conn, addr = s.accept()
+            conn, addr = listen(s)
             print(f'[+] node connected with ip: {addr}')
-            threading.Thread(target=workToDo, args=(conn,addr,)).start()
+            Thread(target=workToDo, args=(conn,addr,)).start()
+
 
 def workToDo(conn, addr):
-    print('start thread')
+    print('[+] start thread')
     with conn:
         with open('pass.lst') as file:
+            print('sending hash')
             conn.send(file.read().encode())
+        print(f'Node {addr[0]}: {conn.recv(1024).decode()}')
         while True:
             try:
+                if not work:
+                    print('[+] no more work to do')
+                    os._exit(0)
+                    break
                 currentWork = work.pop()
                 command = f'{args.command} --node:{currentWork}/{totalWork}'
-                conn.sendall(command.encode())
+
+                print(f'[+] send work {currentWork} to node {addr}')
+                conn.send(command.encode())
                 data = conn.recv(1024).decode()
-                print(data)
-                print(f' {addr} end work: {currentWork}')
+                print(f'[+] Status: {data}')
+                print(f'[+] node {addr} finish the work: {currentWork}')
+                print('-------------------------------------------------')
+
             except Exception as e:
+                print(f'[-] Disconnect Node {addr}')
                 print(e)
                 break
 
+def listen(s):
+    s.listen()
+    return s.accept()
 
 if __name__ == "__main__":
     main()
