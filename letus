@@ -5,10 +5,10 @@ import socket
 from args import argsParser
 from threading import Thread
 import os
+import logging
 
 HOST = '192.168.0.27'
 PORT = 4444
-
 
 totalWork = 20
 work = [x for x in range(1,totalWork) if x%2==1]
@@ -49,7 +49,7 @@ def workToDo(conn, addr):
                 print('-------------------------------------------------')
 
             except Exception as e:
-                print(f'[-] Disconnect Node {addr}')
+                print(f'[-] Disconnected node {addr}')
                 print(e)
                 break
 
